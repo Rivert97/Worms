@@ -32,7 +32,7 @@ RECTANGULO* CrearRectangulo(int x, int y, OPCIONES op)
 }
 
 //_______________________________________________________________ Dibujado de figuras
-void Rectangulo(RECTANGULO *r)
+void Rectangulo(RECTANGULO *r, float offX, float offY)
 {
 	AsignaColor(r->color);
 
@@ -51,7 +51,7 @@ void Rectangulo(RECTANGULO *r)
 	}*/
 	glPolygonMode(GL_FRONT, r->tipo);
 
-	glRectf(r->x, r->y, r->x+r->ancho, r->y+r->alto);
+	glRectf(offX + r->x, offY + r->y, offX + r->x+r->ancho, offY + r->y+r->alto);
 	
 	ResetOptions();
 }
@@ -67,9 +67,12 @@ void CrearTerreno()
 	op.factor_linea = 1;*/
 	int i;
 
-	for (i = 0; i < NUM_REC_TERR/2; ++i)
+	for (i = 0; i < NUM_REC_TERR; ++i)
 	{
-		terreno[i].x = i*ANCHO_REC_TERR;
+		if(i > NUM_REC_TERR/2)
+			terreno[i].x = 75 + i*ANCHO_REC_TERR;
+		else
+			terreno[i].x = i*ANCHO_REC_TERR;			
 		terreno[i].y = 0.0;
 		terreno[i].ancho = ANCHO_REC_TERR;
 		terreno[i].alto = 250;
@@ -82,13 +85,13 @@ void CrearTerreno()
 
 }
 
-void DibujarTerreno(float x, float y)
+void DibujarTerreno(float offX, float offY)
 {
 	int i;
 
 	for (i = 0; i < NUM_REC_TERR; ++i)
 	{
-		Rectangulo(terreno + i);
+		Rectangulo(terreno + i, offX, offY);
 	}
 }
 

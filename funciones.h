@@ -1,8 +1,10 @@
 #include <GL/glut.h>
 #include <stdlib.h>
 #include <math.h>
-#define ANCHO 1200
-#define ALTO 650
+#define ANCHO_PANTALLA 1200
+#define ALTO_PANTALLA 650
+#define ANCHO_MUNDO 2075
+#define ALTO_MUNDO 650
 #define NCOLORES 28
 #define NUM_REC_TERR 200
 #define ANCHO_REC_TERR 10
@@ -69,16 +71,18 @@ typedef struct OPCIONES	//Opciones con las que se puede dibujar cada figura
 
 //________________________________________________ Variables globales
 RECTANGULO terreno[NUM_REC_TERR];
+float Px, Py;
 
 //________________________________________________ Prototipos
 //Callbacks
 void display();
+void Animate();
 //Creación de figuras
 RECTANGULO* CrearRectangulo(int x, int y, OPCIONES op);
 //Dibujado de figuras
-void Rectangulo(RECTANGULO *r);
+void Rectangulo(RECTANGULO *r, float offX, float offY);
 void ResetOptions();
 //Extras
 void AsignaColor(COLOR color);
-void DibujarTerreno(float x, float y);
+void DibujarTerreno(float offX, float offY);
 void CrearTerreno();
