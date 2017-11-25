@@ -34,22 +34,15 @@ RECTANGULO* CrearRectangulo(int x, int y, OPCIONES op)
 //_______________________________________________________________ Dibujado de figuras
 void Rectangulo(RECTANGULO *r, float offX, float offY)
 {
+	if(r->x + r->ancho < abs(offX) || r->x > abs(offX) + ANCHO_PANTALLA) return;
 	AsignaColor(r->color);
-
 	glEnable(GL_LINE_STIPPLE);
 	glLineStipple(r->factor_linea, r->tipo_linea);
 	glLineWidth(r->ancho_linea);
 	glPointSize(r->ancho_linea);
-
-	/*if((r->ancho > 0 && r->alto > 0) || (r->ancho < 0 && r->alto < 0))
-	{
-		glPolygonMode(GL_BACK, r->tipo);
-	}
-	else
-	{
-		glPolygonMode(GL_FRONT, r->tipo);
-	}*/
 	glPolygonMode(GL_FRONT, r->tipo);
+
+
 
 	glRectf(offX + r->x, offY + r->y, offX + r->x+r->ancho, offY + r->y+r->alto);
 	
@@ -61,6 +54,7 @@ void DibujarGusanos(WORM * gusanos, int num, float offX, float offY)
 	int i;
 	for(i = 0; i < num; i++)
 	{
+		if(gusanos[i].x + gusanos[i].grueso < abs(offX) || gusanos[i].x > abs(offX) + ANCHO_PANTALLA) continue;
 		AsignaColor(gusanos[i].color);
 		glRectf(offX + gusanos[i].x, offY + gusanos[i].y, offX + gusanos[i].x + gusanos[i].largo, offY + gusanos[i].y + gusanos[i].grueso);//Tail
 		glRectf(offX + gusanos[i].x, offY + gusanos[i].y, offX + gusanos[i].x + gusanos[i].grueso, offY + gusanos[i].y + gusanos[i].alto);//Head
