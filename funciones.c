@@ -56,6 +56,17 @@ void Rectangulo(RECTANGULO *r, float offX, float offY)
 	ResetOptions();
 }
 
+void DibujarGusanos(WORM * gusanos, int num, float offX, float offY)
+{
+	int i;
+	for(i = 0; i < num; i++)
+	{
+		AsignaColor(gusanos[i].color);
+		glRectf(offX + gusanos[i].x, offY + gusanos[i].y, offX + gusanos[i].x + gusanos[i].largo, offY + gusanos[i].y + gusanos[i].grueso);//Tail
+		glRectf(offX + gusanos[i].x, offY + gusanos[i].y, offX + gusanos[i].x + gusanos[i].grueso, offY + gusanos[i].y + gusanos[i].alto);//Head
+	}
+}
+
 //____________________________________________________________ Funciones extras
 void CrearTerreno()
 {
@@ -70,7 +81,7 @@ void CrearTerreno()
 	for (i = 0; i < NUM_REC_TERR; ++i)
 	{
 		if(i > NUM_REC_TERR/2)
-			terreno[i].x = 75 + i*ANCHO_REC_TERR;
+			terreno[i].x = 80 + i*ANCHO_REC_TERR;
 		else
 			terreno[i].x = i*ANCHO_REC_TERR;			
 		terreno[i].y = 0.0;
@@ -84,6 +95,43 @@ void CrearTerreno()
 	}
 
 }
+
+void CrearGusanos()
+{
+	int i;
+	//________________________________- Aliados
+	for(i=0; i < NUM_WORMS; i++)
+	{
+		allies[i].largo = -40;
+		allies[i].alto = 30;
+		allies[i].grueso = 10;
+		allies[i].isAlive = 1;
+		allies[i].x = 50 + i*ANCHO_MUNDO/5.0;
+		allies[i].y = 250;
+		allies[i].color = VERDE_AZUL;
+		allies[i].tipo_linea = L_LINE;
+		allies[i].ancho_linea = 1;
+		allies[i].tipo = GL_FILL;
+		allies[i].factor_linea = 1;
+	}
+
+	//___________________________________ Enemigos
+	for(i=0; i < NUM_WORMS; i++)
+	{
+		enemies[i].largo = 40;
+		enemies[i].alto = 30;
+		enemies[i].grueso = 10;
+		enemies[i].isAlive = 1;
+		enemies[i].x = ANCHO_MUNDO - 50 - i*ANCHO_MUNDO/5.0;
+		enemies[i].y = 250;
+		enemies[i].color = ROJO;
+		enemies[i].tipo_linea = L_LINE;
+		enemies[i].ancho_linea = 1;
+		enemies[i].tipo = GL_FILL;
+		enemies[i].factor_linea = 1;
+	}
+}
+
 
 void DibujarTerreno(float offX, float offY)
 {
@@ -102,7 +150,7 @@ void AsignaColor(COLOR color)
 
 void ResetOptions()
 {
-	glPolygonMode(GL_BACK, GL_FILL);
+	glPolygonMode(GL_FRONT, GL_FILL);
 	glDisable(GL_LINE_STIPPLE);
 	glLineWidth(1);
 	glPointSize(1);
