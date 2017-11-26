@@ -11,16 +11,19 @@ int main(int argc, char** argv)
 
 	glMatrixMode(GL_PROJECTION);
 	gluOrtho2D(0,ANCHO_PANTALLA,0,ALTO_PANTALLA);
-	glutIdleFunc(&Animate);
+
 
 	//ASIGNACION DE CALLBACKS
 	glutDisplayFunc(&display);
+	glutIdleFunc(&Animate);
+	glutKeyboardFunc(&Keyboard);
 
 	//Inicialización de variables
 	CrearTerreno();
 	CrearGusanos();
 	Px = 0;
 	Py = 0;
+	currentWorm = allies;
 
 	//ESTADO DE ESPERA DE EVENTOS
 	glutMainLoop();
@@ -39,7 +42,44 @@ void display()
 
 void Animate()
 {
-	static float vel = 0.1;
-	Px -= vel;
+	static float vel = 0.3;
+	//Px -= vel;
 	glutPostRedisplay();
+}
+
+void Keyboard(unsigned char key, int x, int y)
+{
+	static float vel = 0.5; //unidades
+	static unsigned int prevTime = 0;
+	static unsigned int nextUpWorm = 0;
+	unsigned int deltaTime = glutGet(GLUT_ELAPSED_TIME) - prevTime;
+
+	switch(key)
+	{
+		case 'a':
+		if(currentWorm != NULL)
+		{
+			currentWorm->x -= vel;
+			if(nextUpWorm < glutGet(GLUT_ELAPSED_TIME))
+			{
+				currentWorm->isUp = !currentWorm->isUp;
+				nextUpWorm = glutGet(GLUT_ELAPSED_TIME) + 300;
+			}
+		}
+		break;
+
+		case 'd':
+		if(currentWorm != NULL)
+		{
+			currentWorm->x += vel;
+			if(nextUpWorm < glutGet(GLUT_ELAPSED_TIME))
+			{
+				currentWorm->isUp = !currentWorm->isUp;
+				nextUpWorm = glutGet(GLUT_ELAPSED_TIME) + 300;
+			}
+		}
+		break;
+	}
+
+	prevTime = glutGet(GLUT_ELAPSED_TIME);
 }

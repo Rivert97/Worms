@@ -9,7 +9,7 @@
 #define NCOLORES 28
 #define ANCHO_REC_TERR 10
 #define NUM_REC_TERR (ANCHO_MUNDO-80)/ANCHO_REC_TERR
-#define NUM_WORMS 2
+#define NUM_WORMS 4
 #define PI 3.14159265
 #define L_LINE 0xFFFF
 #define L_DOT 0xAAAA
@@ -84,18 +84,22 @@ typedef struct WORM
 	int tipo;
 	int ancho_linea;
 	int factor_linea;
+	int isUp;
+	int isAtacking;
 }WORM;
 
 //________________________________________________ Variables globales
 RECTANGULO terreno[NUM_REC_TERR];
 WORM allies[NUM_WORMS];
 WORM enemies[NUM_WORMS];
+WORM * currentWorm;
 float Px, Py;
 
 //________________________________________________ Prototipos
 //Callbacks
 void display();
 void Animate();
+void Keyboard(unsigned char key, int x, int y);
 //Creación de figuras
 RECTANGULO* CrearRectangulo(int x, int y, OPCIONES op);
 //Dibujado de figuras
@@ -107,3 +111,5 @@ void AsignaColor(COLOR color);
 void DibujarTerreno(float offX, float offY);
 void CrearTerreno();
 void CrearGusanos();
+float Signo(float num);
+void MedioCirculo(float r, float x, float y, int dir);
