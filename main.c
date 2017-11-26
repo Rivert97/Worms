@@ -17,13 +17,16 @@ int main(int argc, char** argv)
 	glutDisplayFunc(&display);
 	glutIdleFunc(&Animate);
 	glutKeyboardFunc(&Keyboard);
+	glutSpecialFunc(&SpecialKeyboard);
 
 	//Inicialización de variables
 	CrearTerreno();
 	CrearGusanos();
+
 	Px = 0;
 	Py = 0;
-	currentWorm = allies;
+	currentWorm = enemies;
+	CrearBala();
 
 	//ESTADO DE ESPERA DE EVENTOS
 	glutMainLoop();
@@ -37,13 +40,14 @@ void display()
 	DibujarTerreno(Px, Py);
 	DibujarGusanos(allies, NUM_WORMS, Px, Py);//Dibujar aliados
 	DibujarGusanos(enemies, NUM_WORMS, Px, Py);//Dibujar enemigos
+	DibujarBala(Px,Py);
 	glFlush();
 }
 
 void Animate()
 {
 	static float vel = 0.3;
-	//Px -= vel;
+	Px -= vel;
 	glutPostRedisplay();
 }
 
@@ -82,4 +86,24 @@ void Keyboard(unsigned char key, int x, int y)
 	}
 
 	prevTime = glutGet(GLUT_ELAPSED_TIME);
+}
+
+void SpecialKeyboard(int key, int x, int y)
+{
+	static float velAng = 5;
+	if(currentWorm->isAtacking)
+	{
+		switch(key)
+		{
+			case GLUT_KEY_UP:
+				currentWorm->angle += velAng;
+				UpdateBullet();
+				break;
+
+			case GLUT_KEY_DOWN:
+				currentWorm->angle -= velAng;
+				UpdateBullet();
+				break;
+		}
+	}
 }

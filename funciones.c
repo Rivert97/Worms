@@ -90,13 +90,28 @@ void DibujarGusanos(WORM * gusanos, int num, float offX, float offY)
 		}
 		glEnd();
 		glPointSize(1);
-		glLineWidth(1);
+		glLineWidth(10);
 		//_________________________________________ Arma
 		if(gusanos[i].isAtacking == 1)
 		{
-			
+			glBegin(GL_LINES);
+			glVertex2f(offX + gusanos[i].x + cos(gusanos[i].angle*PI/180.0)*20.0, offY + gusanos[i].y + gusanos[i].alto*0.5 + sin(gusanos[i].angle*PI/180.0)*20);
+			glVertex2f(offX + gusanos[i].x - cos(gusanos[i].angle*PI/180.0)*20.0, offY + gusanos[i].y + gusanos[i].alto*0.5 - sin(gusanos[i].angle*PI/180.0)*20);
+			glEnd();
 		}
+		glLineWidth(1);
 	}
+}
+
+void DibujarBala(float offX, float offY)
+{
+	if(bullet.isActive == 0) return;
+
+	glBegin(GL_POLYGON);
+	AsignaColor(bullet.color);
+	MedioCirculo(bullet.r, offX + bullet.x, offY + bullet.y, 1);
+	MedioCirculo(bullet.r, offX + bullet.x, offY + bullet.y, -1);	
+	glEnd();
 }
 
 //____________________________________________________________ Funciones extras
@@ -113,7 +128,7 @@ void CrearTerreno()
 	for (i = 0; i < NUM_REC_TERR; ++i)
 	{
 		if(i > NUM_REC_TERR/2)
-			terreno[i].x = 80 + i*ANCHO_REC_TERR;
+			terreno[i].x = 100 + i*ANCHO_REC_TERR;
 		else
 			terreno[i].x = i*ANCHO_REC_TERR;			
 		terreno[i].y = 0.0;
@@ -147,6 +162,7 @@ void CrearGusanos()
 		allies[i].factor_linea = 1;
 		allies[i].isUp = 0;
 		allies[i].isAtacking = 0;
+		allies[i].angle = 45;
 	}
 
 	//___________________________________ Enemigos
@@ -165,7 +181,21 @@ void CrearGusanos()
 		enemies[i].factor_linea = 1;
 		enemies[i].isUp = 0;
 		enemies[i].isAtacking = 0;
+		enemies[i].angle = -45;
 	}
+}
+
+void CrearBala()
+{
+	bullet.x = currentWorm->x + cos(currentWorm->angle*PI/180.0)*20.0;
+	bullet.y = currentWorm->y + currentWorm->alto*0.5 + sin(currentWorm->angle*PI/180.0)*20;
+	bullet.r = 10;
+	bullet.isActive = 1;
+	bullet.color = AZUL;
+	bullet.tipo_linea = L_LINE;
+	bullet.tipo = GL_FILL;
+	bullet.factor_linea = 1;
+	bullet.ancho_linea = 1;
 }
 
 
@@ -222,4 +252,10 @@ void MedioCirculo(float r, float x, float y, int dir)
 		y1 = r * sin(th/180.0 * PI) + y;
 		glVertex2f(x1,y1);
 	}
+}
+
+void UpdateBullet()
+{
+	bullet.x = currentWorm->x + cos(currentWorm->angle*PI/180.0)*20.0;
+	bullet.y = currentWorm->y + currentWorm->alto*0.5 + sin(currentWorm->angle*PI/180.0)*20;
 }
