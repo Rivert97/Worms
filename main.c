@@ -44,6 +44,7 @@ int main(int argc, char** argv)
 void display()
 {
 	char texto[10];
+	static float randomNumber = 0.5;
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	DibujarTerreno(Px, Py);
@@ -70,6 +71,15 @@ void display()
 			DibujarTexto(texto, ANCHO_PANTALLA/2 - 80, ALTO_PANTALLA-30);
 			sprintf(texto, "Atacar [Enter]");
 			DibujarBoton(texto);
+			/*if(fase == 1)
+			{
+				if(currentWorm->x < (currentWorm->x + randomNumber*30))
+					currentWorm->x += 0.5;
+				else if(currentWorm->x > (currentWorm->x - randomNumber*30))
+					currentWorm->x -= 0.5;
+				else
+					turno++;
+			}*/
 			break;
 
 		case 1://Momento de atacar
@@ -167,6 +177,7 @@ void Animate()
 
 void Keyboard(unsigned char key, int x, int y)
 {
+	//if(fase == 1) return;
 	static float vel = 0.5; //unidades
 	static float velAng = 5;
 	static unsigned int prevTime = 0;
@@ -179,6 +190,8 @@ void Keyboard(unsigned char key, int x, int y)
 		if(currentWorm != NULL && turno == 0)
 		{
 			currentWorm->x -= vel;
+			if(currentWorm->x < 0)
+				currentWorm->x +=vel;
 			UpdateBullet();
 			if(nextUpWorm < glutGet(GLUT_ELAPSED_TIME))
 			{
@@ -192,6 +205,8 @@ void Keyboard(unsigned char key, int x, int y)
 		if(currentWorm != NULL && turno == 0)
 		{
 			currentWorm->x += vel;
+			if(currentWorm->x > ANCHO_MUNDO/2 + 40)
+				currentWorm->x -= vel;
 			UpdateBullet();
 			if(nextUpWorm < glutGet(GLUT_ELAPSED_TIME))
 			{
@@ -248,10 +263,14 @@ void SpecialKeyboard(int key, int x, int y)
 	switch(key)
 	{
 		case GLUT_KEY_LEFT:
+			if(Px > ANCHO_PANTALLA/2)
+				return;
 			Px += velCam;
 			break;
 
 		case GLUT_KEY_RIGHT:
+			if(Px < -(ANCHO_MUNDO - ANCHO_PANTALLA/2))
+				return;
 			Px -= velCam;
 			break;
 

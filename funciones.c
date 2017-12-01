@@ -203,7 +203,7 @@ void CrearGusanos()
 		allies[i].grueso = 10;
 		allies[i].isAlive = 1;
 		//allies[i].x = 50 + i*ANCHO_MUNDO/(float)(NUM_WORMS+3);
-		allies[i].x = 50 + 1.0*rand()/RAND_MAX*(ANCHO_MUNDO/2 - 40);
+		allies[i].x = 50 + 1.0*rand()/RAND_MAX*(ANCHO_MUNDO/2 - 90);
 		allies[i].y = 150;
 		allies[i].color = VERDE_AZUL;
 		allies[i].tipo_linea = L_LINE;
@@ -223,7 +223,7 @@ void CrearGusanos()
 		enemies[i].grueso = 10;
 		enemies[i].isAlive = 1;
 		//enemies[i].x = ANCHO_MUNDO - 50 - i*ANCHO_MUNDO/(float)(NUM_WORMS + 3);
-		enemies[i].x = ANCHO_MUNDO - 50 - 1.0*rand()/RAND_MAX*(ANCHO_MUNDO/2 - 40);
+		enemies[i].x = ANCHO_MUNDO - 50 - 1.0*rand()/RAND_MAX*(ANCHO_MUNDO/2 - 90);
 		enemies[i].y = 150;
 		enemies[i].color = ROJO;
 		enemies[i].tipo_linea = L_LINE;
@@ -270,6 +270,39 @@ void DibujarTerreno(float offX, float offY)
 	{
 		Rectangulo(terreno + i, offX, offY);
 	}
+
+	//Nubes?
+	AsignaColor(BLANCO);
+	for(i=0; i<5;i++)
+	{
+		/*glBegin(GL_POLYGON);
+		glVertex2f(offX + ANCHO_MUNDO/4 * i + 20, offY + ALTO_PANTALLA - 60);
+		glVertex2f(offX + ANCHO_MUNDO/4 * i - 20, offY + ALTO_PANTALLA - 60);
+		glVertex2f(offX + ANCHO_MUNDO/4 * i - 20, offY + ALTO_PANTALLA - 80);
+		glVertex2f(offX + ANCHO_MUNDO/4 * i - 40, offY + ALTO_PANTALLA - 80);
+		glVertex2f(offX + ANCHO_MUNDO/4 * i - 40, offY + ALTO_PANTALLA - 80);
+		glVertex2f(offX + ANCHO_MUNDO/4 * i - 60, offY + ALTO_PANTALLA - 100);
+		glVertex2f(offX + ANCHO_MUNDO/4 * i + 60, offY + ALTO_PANTALLA - 100);
+		glVertex2f(offX + ANCHO_MUNDO/4 * i + 40, offY + ALTO_PANTALLA - 80);
+		glVertex2f(offX + ANCHO_MUNDO/4 * i + 20, offY + ALTO_PANTALLA - 80);
+		glEnd();*/
+		glBegin(GL_POLYGON);
+		MedioCirculo(20, offX + ANCHO_MUNDO/4*i - 20, offY + ALTO_PANTALLA - 60, 1);
+		MedioCirculo(20, offX + ANCHO_MUNDO/4*i - 20, offY + ALTO_PANTALLA - 60, 0);
+		MedioCirculo(20, offX + ANCHO_MUNDO/4*i - 40, offY + ALTO_PANTALLA - 80, 1);
+		MedioCirculo(20, offX + ANCHO_MUNDO/4*i - 40, offY + ALTO_PANTALLA - 80, 0);
+		MedioCirculo(20, offX + ANCHO_MUNDO/4*i - 60, offY + ALTO_PANTALLA - 100, 1);
+		MedioCirculo(20, offX + ANCHO_MUNDO/4*i - 60, offY + ALTO_PANTALLA - 100, 0);
+		MedioCirculo(20, offX + ANCHO_MUNDO/4*i + 20, offY + ALTO_PANTALLA - 60, 1);
+		MedioCirculo(20, offX + ANCHO_MUNDO/4*i + 20, offY + ALTO_PANTALLA - 60, 0);
+		MedioCirculo(20, offX + ANCHO_MUNDO/4*i + 40, offY + ALTO_PANTALLA - 80, 1);
+		MedioCirculo(20, offX + ANCHO_MUNDO/4*i + 40, offY + ALTO_PANTALLA - 80, 0);
+		MedioCirculo(20, offX + ANCHO_MUNDO/4*i + 60, offY + ALTO_PANTALLA - 100, 1);
+		MedioCirculo(20, offX + ANCHO_MUNDO/4*i + 60, offY + ALTO_PANTALLA - 100, 0);
+		glEnd();
+		glRectf(offX + ANCHO_MUNDO/4*i - 60, offY + ALTO_PANTALLA - 120, offX + ANCHO_MUNDO/4*i + 60, offY + ALTO_PANTALLA - 80);
+	}
+
 }
 
 void AsignaColor(COLOR color)
