@@ -86,15 +86,6 @@ typedef struct
 	float dir;
 }BULLET;
 
-typedef struct OPCIONES	//Opciones con las que se puede dibujar cada figura
-{
-	COLOR color;	//PaletaColor
-	int tipo_linea;	//Patrón
-	int llenado;		//fill, line, point
-	int ancho_linea;
-	int factor_linea;
-}OPCIONES;
-
 typedef struct WORM
 {
 	float x;
@@ -134,8 +125,6 @@ void Animate();
 void Keyboard(unsigned char key, int x, int y);
 void SpecialKeyboard(int key, int x, int y);
 void Mouse(int button, int state, int x, int y);
-//Creación de figuras
-RECTANGULO* CrearRectangulo(int x, int y, OPCIONES op);
 //Dibujado de figuras
 void Rectangulo(RECTANGULO *r, float offX, float offY);
 void ResetOptions();

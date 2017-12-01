@@ -12,25 +12,6 @@ const float PaletaColor[NCOLORES][3] = {0,0,0,/**/0,0,0.5,/**/0,0,1,/**/
 								1,0.5,1,/**/1,1,0.5,/**/1,1,1};					//27 combinaciones
 
 
-//__________________________________________________________ Creación de figuras
-RECTANGULO* CrearRectangulo(int x, int y, OPCIONES op)
-{
-	RECTANGULO *aux;
-
-	aux = (RECTANGULO*)malloc(sizeof(RECTANGULO));
-	aux->x = x;
-	aux->y = y;
-	aux->ancho = 50;
-	aux->alto = 20;
-	aux->color = op.color;
-	aux->tipo = op.llenado;
-	aux->tipo_linea = op.tipo_linea;
-	aux->factor_linea = op.factor_linea;
-	aux->ancho_linea = op.ancho_linea;
-
-	return aux;
-}
-
 //_______________________________________________________________ Dibujado de figuras
 void Rectangulo(RECTANGULO *r, float offX, float offY)
 {
@@ -223,7 +204,7 @@ void CrearGusanos()
 		enemies[i].grueso = 10;
 		enemies[i].isAlive = 1;
 		//enemies[i].x = ANCHO_MUNDO - 50 - i*ANCHO_MUNDO/(float)(NUM_WORMS + 3);
-		enemies[i].x = ANCHO_MUNDO - 50 - 1.0*rand()/RAND_MAX*(ANCHO_MUNDO/2 - 90);
+		enemies[i].x = ANCHO_MUNDO - 1.0*rand()/RAND_MAX*(ANCHO_MUNDO/2 - 90);
 		enemies[i].y = 150;
 		enemies[i].color = ROJO;
 		enemies[i].tipo_linea = L_LINE;
@@ -402,12 +383,12 @@ void DestroyWorms()
 	int i;
 	for(i = 0; i < NUM_WORMS; i++)
 	{
-		if(((allies[i].x < (bullet.x + bullet.r)) && (allies[i].x > (bullet.x - bullet.r))) || ((allies[i].x + allies[i].largo) > (bullet.x - bullet.r) && (allies[i].x + allies[i].largo) < (bullet.x + bullet.r)))
+		if(((allies[i].x < (bullet.x + bullet.r)) && (allies[i].x > (bullet.x - bullet.r - allies[i].grueso))) || ((allies[i].x + allies[i].largo) > (bullet.x - bullet.r) && (allies[i].x + allies[i].largo) < (bullet.x + bullet.r)))
 		{
 			allies[i].isAlive = 0;
 		}
 
-		if((enemies[i].x < (bullet.x + bullet.r) && enemies[i].x > (bullet.x - bullet.r)) || ((enemies[i].x + enemies[i].largo) > (bullet.x - bullet.r) && (enemies[i].x + enemies[i].largo) < (bullet.x + bullet.r)))
+		if((enemies[i].x < (bullet.x + bullet.r + enemies[i].grueso) && enemies[i].x > (bullet.x - bullet.r)) || ((enemies[i].x + enemies[i].largo) > (bullet.x - bullet.r) && (enemies[i].x + enemies[i].largo) < (bullet.x + bullet.r)))
 		{
 			enemies[i].isAlive = 0;
 		}

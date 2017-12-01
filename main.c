@@ -90,13 +90,13 @@ void display()
 			break;
 
 		case 2://Cargando
-			sprintf(texto, "Espacio para disparar");
+			sprintf(texto, "Enter para disparar");
 			DibujarTexto(texto, ANCHO_PANTALLA/2 - 80, ALTO_PANTALLA - 30);
 			DibujarVelocidad(velocidad, Px, Py);
 			break;
 
 		case 5://Ganaste
-			sprintf(texto, "ENEMIGO ANIQUILADO!");
+			sprintf(texto, "¡EQUIPO ROJO ANIQUILADO!");
 			AsignaColor(VERDE);
 			DibujarTexto(texto, ANCHO_PANTALLA/2 - 150, ALTO_PANTALLA/2);
 			sprintf(texto, "Jugar de nuevo");
@@ -104,7 +104,7 @@ void display()
 			break;
 
 		case 6://Perdiste
-			sprintf(texto, "TE HAN ANIQUILADO!");
+			sprintf(texto, "¡EQUIPO VERDE ANIQUILADO!");
 			AsignaColor(ROJO);
 			DibujarTexto(texto, ANCHO_PANTALLA/2 - 150, ALTO_PANTALLA/2);
 			sprintf(texto, "Jugar de nuevo");
@@ -119,7 +119,7 @@ void display()
 
 void Animate()
 {
-	static float vel = 0.5;
+	static float vel = 1;
 	static float dir = 1;
 	static unsigned int prevTime = 0;
 	unsigned int deltaTime = glutGet(GLUT_ELAPSED_TIME) - prevTime;
@@ -136,6 +136,7 @@ void Animate()
 		UpdateBulletPosition();
 		if(bullet.x > ANCHO_PANTALLA/2)
 			Px = -bullet.x + ANCHO_PANTALLA/2;
+		
 	}
 	if(turno == 4)
 	{
@@ -190,8 +191,16 @@ void Keyboard(unsigned char key, int x, int y)
 		if(currentWorm != NULL && turno == 0)
 		{
 			currentWorm->x -= vel;
-			if(currentWorm->x < 0)
-				currentWorm->x +=vel;
+			if(fase == 0)
+			{
+				if(currentWorm->x < 30)
+					currentWorm->x = 30;
+			}
+			else
+			{
+				if(currentWorm->x < ANCHO_MUNDO/2 + 40)
+					currentWorm->x = ANCHO_MUNDO/2 + 40;
+			}
 			UpdateBullet();
 			if(nextUpWorm < glutGet(GLUT_ELAPSED_TIME))
 			{
@@ -205,8 +214,16 @@ void Keyboard(unsigned char key, int x, int y)
 		if(currentWorm != NULL && turno == 0)
 		{
 			currentWorm->x += vel;
-			if(currentWorm->x > ANCHO_MUNDO/2 + 40)
-				currentWorm->x -= vel;
+			if(fase == 1)
+			{
+				if(currentWorm->x > ANCHO_MUNDO - 40)
+					currentWorm->x = ANCHO_MUNDO - 40;
+			}
+			else
+			{
+				if(currentWorm->x > ANCHO_MUNDO/2 - 30)
+					currentWorm->x = ANCHO_MUNDO/2 - 30;
+			}
 			UpdateBullet();
 			if(nextUpWorm < glutGet(GLUT_ELAPSED_TIME))
 			{
@@ -219,7 +236,10 @@ void Keyboard(unsigned char key, int x, int y)
 		case 'w':
 		if(currentWorm->isAtacking == 1 && turno == 1)
 		{
-			currentWorm->angle += velAng;
+			if(fase == 0)
+				currentWorm->angle += velAng;
+			else
+				currentWorm->angle -= velAng;
 			UpdateBullet();
 		}
 		break;
@@ -227,12 +247,20 @@ void Keyboard(unsigned char key, int x, int y)
 		case 's':
 		if(currentWorm->isAtacking == 1 && turno == 1)
 		{
-			currentWorm->angle -= velAng;
+			if(fase == 0)
+				currentWorm->angle -= velAng;
+			else
+				currentWorm->angle += velAng;
 			UpdateBullet();
 		}
 		break;
 
 		case 13://enter
+		if(currentWorm->isAtacking == 1 && turno == 2)
+		{
+			turno = 3;
+			SetUpAttack();
+		}
 		if(turno == 0)
 		{
 			turno = 1;
