@@ -2,20 +2,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 #define ANCHO_PANTALLA 1200
 #define ALTO_PANTALLA 650
-#define ANCHO_MUNDO 2580
+#define ANCHO_MUNDO 2580	//10 pixeles = 1 metro
 #define ALTO_MUNDO 650
 #define NCOLORES 28
 #define ANCHO_REC_TERR 10
 #define NUM_REC_TERR (ANCHO_MUNDO-100)/ANCHO_REC_TERR
 #define NUM_WORMS 4
 #define PI 3.14159265
+#define MAX_VEL 50 //m/s
+#define GRAVEDAD 9.81//m/s2
+#define RADIO_EXPLOSION 50
 #define L_LINE 0xFFFF
 #define L_DOT 0xAAAA
 #define L_DOTDASH 0xC9C9
 #define L_DASH 0x6666
-#define L_LONGDOTDASH 0xBEBE
+
 
 //__________________________________________________Paleta de colores
 typedef enum{			//Enumeración de colores
@@ -62,7 +66,7 @@ typedef struct
 	int factor_linea;
 }RECTANGULO;
 
-typedef struct               //Estructura círculo
+typedef struct 
 {
 	float x;
 	float y;
@@ -73,7 +77,14 @@ typedef struct               //Estructura círculo
 	int tipo;
 	int ancho_linea;
 	int factor_linea;
-}CIRCULO;
+	float v0x;
+	float v0y;
+	float x0;
+	float y0;
+	float t;
+	unsigned int destTime;
+	float dir;
+}BULLET;
 
 typedef struct OPCIONES	//Opciones con las que se puede dibujar cada figura
 {
@@ -107,8 +118,14 @@ RECTANGULO terreno[NUM_REC_TERR];
 WORM allies[NUM_WORMS];
 WORM enemies[NUM_WORMS];
 WORM * currentWorm;
-CIRCULO bullet;
+BULLET bullet;
 float Px, Py;
+int turno; //0  moviendo, 1 dapuntando, 2 cargando, 3 en el aire, 4 explosion, 5 ganaste, 6 perdiste
+int allyIndex;
+int enemyIndex;
+float velocidad;
+int fase; //0 aliado, 1 enemigo
+RECTANGULO btDisparar;
 
 //________________________________________________ Prototipos
 //Callbacks
@@ -116,6 +133,7 @@ void display();
 void Animate();
 void Keyboard(unsigned char key, int x, int y);
 void SpecialKeyboard(int key, int x, int y);
+void Mouse(int button, int state, int x, int y);
 //Creación de figuras
 RECTANGULO* CrearRectangulo(int x, int y, OPCIONES op);
 //Dibujado de figuras
@@ -123,12 +141,21 @@ void Rectangulo(RECTANGULO *r, float offX, float offY);
 void ResetOptions();
 void DibujarGusanos(WORM * gusanos, int num, float offX, float offY);
 void DibujarBala(float offX, float offY);
+void DibujarTexto(char *text, float x, float y);
+void DibujarBoton(char *text);
+void DibujarVelocidad(int vel, float offX, float offY);
 //Extras
 void AsignaColor(COLOR color);
 void DibujarTerreno(float offX, float offY);
 void CrearTerreno();
 void CrearGusanos();
 void CrearBala();
+void CrearBoton();
+void DestroyBullet();
 float Signo(float num);
 void MedioCirculo(float r, float x, float y, int dir);
 void UpdateBullet();
+void UpdateBulletPosition();
+void SetUpAttack();
+void DestroyWorms();
+int GetNextIndex(WORM* gusanos, int maxIndex, int currentIndex);

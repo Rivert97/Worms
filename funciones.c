@@ -34,7 +34,7 @@ RECTANGULO* CrearRectangulo(int x, int y, OPCIONES op)
 //_______________________________________________________________ Dibujado de figuras
 void Rectangulo(RECTANGULO *r, float offX, float offY)
 {
-	if(r->x + r->ancho < abs(offX) || r->x > abs(offX) + ANCHO_PANTALLA) return;
+	if(r->x + r->ancho < -offX || r->x > -offX + ANCHO_PANTALLA) return;
 	AsignaColor(r->color);
 	glEnable(GL_LINE_STIPPLE);
 	glLineStipple(r->factor_linea, r->tipo_linea);
@@ -55,7 +55,8 @@ void DibujarGusanos(WORM * gusanos, int num, float offX, float offY)
 
 	for(i = 0; i < num; i++)
 	{
-		if(gusanos[i].x + gusanos[i].grueso < abs(offX) || gusanos[i].x > abs(offX) + ANCHO_PANTALLA) continue;
+		if(gusanos[i].isAlive == 0) continue;
+		if(gusanos[i].x + gusanos[i].grueso < -offX || gusanos[i].x > -offX + ANCHO_PANTALLA) continue;
 		AsignaColor(gusanos[i].color);
 		
 		if(gusanos[i].isUp == 1)	//Gusano caminando
@@ -107,11 +108,59 @@ void DibujarBala(float offX, float offY)
 {
 	if(bullet.isActive == 0) return;
 
-	glBegin(GL_POLYGON);
 	AsignaColor(bullet.color);
+	glEnable(GL_LINE_STIPPLE);
+	glLineStipple(bullet.factor_linea, bullet.tipo_linea);
+	glLineWidth(bullet.ancho_linea);
+	glPointSize(bullet.ancho_linea);
+	glPolygonMode(GL_FRONT, bullet.tipo);
+
+	glBegin(GL_POLYGON);
 	MedioCirculo(bullet.r, offX + bullet.x, offY + bullet.y, 1);
 	MedioCirculo(bullet.r, offX + bullet.x, offY + bullet.y, -1);	
 	glEnd();
+
+	ResetOptions();
+}
+
+void DibujarBoton(char * text)
+{
+	AsignaColor(btDisparar.color);
+	glEnable(GL_LINE_STIPPLE);
+	glLineStipple(btDisparar.factor_linea, btDisparar.tipo_linea);
+	glLineWidth(btDisparar.ancho_linea);
+	glPointSize(btDisparar.ancho_linea);
+	glPolygonMode(GL_FRONT, btDisparar.tipo);
+
+	glRectf(btDisparar.x, btDisparar.y, btDisparar.x + btDisparar.ancho, btDisparar.y + btDisparar.alto);
+	
+	AsignaColor(NEGRO);	
+	DibujarTexto(text, btDisparar.x + 2, btDisparar.y + 8);
+
+	ResetOptions();
+}
+
+void DibujarVelocidad(int vel, float offX, float offY)
+{
+	int x;
+	//Barra
+	glBegin(GL_TRIANGLES);
+	AsignaColor(VERDE);
+	glVertex2f(offX + currentWorm->x - 30, offY + currentWorm->y + 50);
+	AsignaColor(ROJO);
+	glVertex2f(offX + currentWorm->x + 20, offY + currentWorm->y + 50);
+	glVertex2f(offX + currentWorm->x + 20, offY + currentWorm->y + 70);
+	glEnd();
+	
+	//Linea indicador
+	x = currentWorm->x - 30 + vel/2;
+	glLineWidth(3);
+	AsignaColor(NEGRO);
+	glBegin(GL_LINES);
+	glVertex2f(offX + x, offY + currentWorm->y + 50);
+	glVertex2f(offX + x, offY + currentWorm->y + 70);
+	glEnd();
+	ResetOptions();
 }
 
 //____________________________________________________________ Funciones extras
@@ -133,7 +182,7 @@ void CrearTerreno()
 			terreno[i].x = i*ANCHO_REC_TERR;			
 		terreno[i].y = 0.0;
 		terreno[i].ancho = ANCHO_REC_TERR;
-		terreno[i].alto = 250;
+		terreno[i].alto = 150;
 		terreno[i].color = VERDE;
 		terreno[i].tipo_linea = L_LINE;
 		terreno[i].ancho_linea = 1;
@@ -153,8 +202,9 @@ void CrearGusanos()
 		allies[i].alto = 30;
 		allies[i].grueso = 10;
 		allies[i].isAlive = 1;
-		allies[i].x = 50 + i*ANCHO_MUNDO/(float)(NUM_WORMS+3);
-		allies[i].y = 250;
+		//allies[i].x = 50 + i*ANCHO_MUNDO/(float)(NUM_WORMS+3);
+		allies[i].x = 50 + 1.0*rand()/RAND_MAX*(ANCHO_MUNDO/2 - 40);
+		allies[i].y = 150;
 		allies[i].color = VERDE_AZUL;
 		allies[i].tipo_linea = L_LINE;
 		allies[i].ancho_linea = 1;
@@ -172,8 +222,9 @@ void CrearGusanos()
 		enemies[i].alto = 30;
 		enemies[i].grueso = 10;
 		enemies[i].isAlive = 1;
-		enemies[i].x = ANCHO_MUNDO - 50 - i*ANCHO_MUNDO/(float)(NUM_WORMS + 3);
-		enemies[i].y = 250;
+		//enemies[i].x = ANCHO_MUNDO - 50 - i*ANCHO_MUNDO/(float)(NUM_WORMS + 3);
+		enemies[i].x = ANCHO_MUNDO - 50 - 1.0*rand()/RAND_MAX*(ANCHO_MUNDO/2 - 40);
+		enemies[i].y = 150;
 		enemies[i].color = ROJO;
 		enemies[i].tipo_linea = L_LINE;
 		enemies[i].ancho_linea = 1;
@@ -181,7 +232,7 @@ void CrearGusanos()
 		enemies[i].factor_linea = 1;
 		enemies[i].isUp = 0;
 		enemies[i].isAtacking = 0;
-		enemies[i].angle = -45;
+		enemies[i].angle = 135;
 	}
 }
 
@@ -190,7 +241,7 @@ void CrearBala()
 	bullet.x = currentWorm->x + cos(currentWorm->angle*PI/180.0)*20.0;
 	bullet.y = currentWorm->y + currentWorm->alto*0.5 + sin(currentWorm->angle*PI/180.0)*20;
 	bullet.r = 10;
-	bullet.isActive = 1;
+	bullet.isActive = 0;
 	bullet.color = AZUL;
 	bullet.tipo_linea = L_LINE;
 	bullet.tipo = GL_FILL;
@@ -198,6 +249,18 @@ void CrearBala()
 	bullet.ancho_linea = 1;
 }
 
+void CrearBoton()
+{
+	btDisparar.x = 20;
+	btDisparar.y = ALTO_PANTALLA-40;
+	btDisparar.ancho = 160;
+	btDisparar.alto = 30;
+	btDisparar.color = ROJO;
+	btDisparar.tipo_linea = L_LINE;
+	btDisparar.tipo = GL_FILL;
+	btDisparar.ancho_linea = 1;
+	btDisparar.factor_linea = 1;
+}
 
 void DibujarTerreno(float offX, float offY)
 {
@@ -258,4 +321,76 @@ void UpdateBullet()
 {
 	bullet.x = currentWorm->x + cos(currentWorm->angle*PI/180.0)*20.0;
 	bullet.y = currentWorm->y + currentWorm->alto*0.5 + sin(currentWorm->angle*PI/180.0)*20;
+}
+
+void DibujarTexto(char *text, float x, float y)
+{
+	char* c;
+	glRasterPos2f(x,y);
+
+	for(c=text; *c!='\0'; c++)
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *c);
+}
+
+void SetUpAttack()
+{
+	bullet.x0 = bullet.x;
+	bullet.y0 = bullet.y;
+	bullet.v0x = (float)(velocidad/100.0)*MAX_VEL*cos(currentWorm->angle*PI/180.0)*10.0;
+	bullet.v0y = (float)(velocidad/100.0)*MAX_VEL*sin(currentWorm->angle*PI/180.0)*10.0;
+	bullet.t = 0;
+	bullet.dir = 1;
+}
+
+void UpdateBulletPosition()
+{
+	if(bullet.y < 150)
+	{
+		DestroyBullet();
+		currentWorm->isAtacking = 0;
+		return;
+	}
+
+	bullet.x = bullet.x0 + bullet.v0x * bullet.t;
+	bullet.y = bullet.y0 + bullet.v0y * bullet.t - (5*GRAVEDAD*bullet.t*bullet.t);
+}
+
+void DestroyBullet()
+{
+	bullet.r = RADIO_EXPLOSION;
+	bullet.tipo = GL_LINE;
+	bullet.destTime = glutGet(GLUT_ELAPSED_TIME);
+	DestroyWorms();
+	turno = 4;
+}
+
+void DestroyWorms()
+{
+	int i;
+	for(i = 0; i < NUM_WORMS; i++)
+	{
+		if(((allies[i].x < (bullet.x + bullet.r)) && (allies[i].x > (bullet.x - bullet.r))) || ((allies[i].x + allies[i].largo) > (bullet.x - bullet.r) && (allies[i].x + allies[i].largo) < (bullet.x + bullet.r)))
+		{
+			allies[i].isAlive = 0;
+		}
+
+		if((enemies[i].x < (bullet.x + bullet.r) && enemies[i].x > (bullet.x - bullet.r)) || ((enemies[i].x + enemies[i].largo) > (bullet.x - bullet.r) && (enemies[i].x + enemies[i].largo) < (bullet.x + bullet.r)))
+		{
+			enemies[i].isAlive = 0;
+		}
+	}
+}
+
+int GetNextIndex(WORM* gusanos, int maxIndex, int currentIndex)
+{
+	int i, j;
+	for(j=0;j<2;j++)
+	{
+		for(i=0; i < maxIndex; i++)
+		{
+			if(j==0&&i<=currentIndex) continue;
+			if(gusanos[i].isAlive == 1) return i;
+		}
+	}
+	return -1;
 }

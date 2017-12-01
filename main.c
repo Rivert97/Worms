@@ -18,15 +18,23 @@ int main(int argc, char** argv)
 	glutIdleFunc(&Animate);
 	glutKeyboardFunc(&Keyboard);
 	glutSpecialFunc(&SpecialKeyboard);
+	glutMouseFunc(&Mouse);
 
 	//Inicialización de variables
+	srand(time(NULL));
 	CrearTerreno();
 	CrearGusanos();
 
-	Px = 0;
+	Px = -ANCHO_MUNDO + ANCHO_PANTALLA/2;
 	Py = 0;
-	currentWorm = enemies;
+	allyIndex = 0;
+	enemyIndex = 0;
+	currentWorm = &allies[allyIndex];
 	CrearBala();
+	CrearBoton();
+	turno = -1;
+	velocidad = 0;
+	fase = 0;
 
 	//ESTADO DE ESPERA DE EVENTOS
 	glutMainLoop();
@@ -35,25 +43,132 @@ int main(int argc, char** argv)
 
 void display()
 {
+	char texto[10];
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	DibujarTerreno(Px, Py);
 	DibujarGusanos(allies, NUM_WORMS, Px, Py);//Dibujar aliados
 	DibujarGusanos(enemies, NUM_WORMS, Px, Py);//Dibujar enemigos
 	DibujarBala(Px,Py);
+	
+	AsignaColor(NEGRO);
+	switch (turno)
+	{
+		case -2:
+			if(-Px < (currentWorm->x - ANCHO_PANTALLA/2))
+				Px--;
+			else
+				turno = 0;
+		case -1:
+			if(-Px > (currentWorm->x - ANCHO_PANTALLA/2))
+				Px++;
+			else
+				turno = 0;
+			break;
+		case 0://Momento de mover
+			sprintf(texto, "Muevete con 'a' y 'd'");
+			DibujarTexto(texto, ANCHO_PANTALLA/2 - 80, ALTO_PANTALLA-30);
+			sprintf(texto, "Atacar [Enter]");
+			DibujarBoton(texto);
+			break;
+
+		case 1://Momento de atacar
+			sprintf(texto, "Apunta con 'w' y 's'");
+			DibujarTexto(texto, ANCHO_PANTALLA/2 - 80, ALTO_PANTALLA-30);
+			sprintf(texto, "Disparar [Enter]");
+			DibujarBoton(texto);
+			break;
+
+		case 2://Cargando
+			sprintf(texto, "Espacio para disparar");
+			DibujarTexto(texto, ANCHO_PANTALLA/2 - 80, ALTO_PANTALLA - 30);
+			DibujarVelocidad(velocidad, Px, Py);
+			break;
+
+		case 5://Ganaste
+			sprintf(texto, "ENEMIGO ANIQUILADO!");
+			AsignaColor(VERDE);
+			DibujarTexto(texto, ANCHO_PANTALLA/2 - 150, ALTO_PANTALLA/2);
+			sprintf(texto, "Jugar de nuevo");
+			DibujarBoton(texto);
+			break;
+
+		case 6://Perdiste
+			sprintf(texto, "TE HAN ANIQUILADO!");
+			AsignaColor(ROJO);
+			DibujarTexto(texto, ANCHO_PANTALLA/2 - 150, ALTO_PANTALLA/2);
+			sprintf(texto, "Jugar de nuevo");
+			DibujarBoton(texto);
+			break;
+		default:
+			break;
+	}
+
 	glFlush();
 }
 
 void Animate()
 {
-	static float vel = 0.3;
-	Px -= vel;
+	static float vel = 0.5;
+	static float dir = 1;
+	static unsigned int prevTime = 0;
+	unsigned int deltaTime = glutGet(GLUT_ELAPSED_TIME) - prevTime;
+
+	if(turno == 2)
+	{
+		if(velocidad < 0 && dir == -1 || velocidad > 100 && dir == 1)
+			dir*=-1;
+		velocidad+=dir*vel;
+	}
+	if(turno == 3)
+	{
+		bullet.t += deltaTime/1000.0;
+		UpdateBulletPosition();
+		if(bullet.x > ANCHO_PANTALLA/2)
+			Px = -bullet.x + ANCHO_PANTALLA/2;
+	}
+	if(turno == 4)
+	{
+		if(glutGet(GLUT_ELAPSED_TIME) - bullet.destTime > 1000)
+		{
+			if(fase == 0)
+			{
+				enemyIndex = GetNextIndex(enemies, NUM_WORMS, enemyIndex);
+				if(enemyIndex == -1)
+				{
+					turno = 5;
+					glutPostRedisplay();
+					return;
+				}
+				currentWorm = &enemies[enemyIndex];
+				fase = 1;
+			}
+			else
+			{
+				allyIndex = GetNextIndex(allies, NUM_WORMS, allyIndex);
+				if(allyIndex == -1)
+				{
+					turno = 6;
+					glutPostRedisplay();
+					return;
+				}
+				currentWorm = &allies[allyIndex];
+				fase = 0;
+			}
+			Px = -currentWorm->x + ANCHO_PANTALLA/2;
+			CrearBala();
+			turno = 0;
+		}
+	}
+
+	prevTime = glutGet(GLUT_ELAPSED_TIME);
 	glutPostRedisplay();
 }
 
 void Keyboard(unsigned char key, int x, int y)
 {
 	static float vel = 0.5; //unidades
+	static float velAng = 5;
 	static unsigned int prevTime = 0;
 	static unsigned int nextUpWorm = 0;
 	unsigned int deltaTime = glutGet(GLUT_ELAPSED_TIME) - prevTime;
@@ -61,9 +176,10 @@ void Keyboard(unsigned char key, int x, int y)
 	switch(key)
 	{
 		case 'a':
-		if(currentWorm != NULL)
+		if(currentWorm != NULL && turno == 0)
 		{
 			currentWorm->x -= vel;
+			UpdateBullet();
 			if(nextUpWorm < glutGet(GLUT_ELAPSED_TIME))
 			{
 				currentWorm->isUp = !currentWorm->isUp;
@@ -73,14 +189,52 @@ void Keyboard(unsigned char key, int x, int y)
 		break;
 
 		case 'd':
-		if(currentWorm != NULL)
+		if(currentWorm != NULL && turno == 0)
 		{
 			currentWorm->x += vel;
+			UpdateBullet();
 			if(nextUpWorm < glutGet(GLUT_ELAPSED_TIME))
 			{
 				currentWorm->isUp = !currentWorm->isUp;
 				nextUpWorm = glutGet(GLUT_ELAPSED_TIME) + 300;
 			}
+		}
+		break;
+
+		case 'w':
+		if(currentWorm->isAtacking == 1 && turno == 1)
+		{
+			currentWorm->angle += velAng;
+			UpdateBullet();
+		}
+		break;
+
+		case 's':
+		if(currentWorm->isAtacking == 1 && turno == 1)
+		{
+			currentWorm->angle -= velAng;
+			UpdateBullet();
+		}
+		break;
+
+		case 13://enter
+		if(turno == 0)
+		{
+			turno = 1;
+			currentWorm->isAtacking = 1;
+			bullet.isActive = 1;
+		}
+		else if (turno == 1)
+		{
+			turno = 2;
+		}
+		break;
+
+		case ' ':
+		if(currentWorm->isAtacking == 1 && turno == 2)
+		{
+			turno = 3;
+			SetUpAttack();
 		}
 		break;
 	}
@@ -90,20 +244,58 @@ void Keyboard(unsigned char key, int x, int y)
 
 void SpecialKeyboard(int key, int x, int y)
 {
-	static float velAng = 5;
-	if(currentWorm->isAtacking)
+	static float velCam = 10;
+	switch(key)
 	{
-		switch(key)
-		{
-			case GLUT_KEY_UP:
-				currentWorm->angle += velAng;
-				UpdateBullet();
-				break;
+		case GLUT_KEY_LEFT:
+			Px += velCam;
+			break;
 
-			case GLUT_KEY_DOWN:
-				currentWorm->angle -= velAng;
-				UpdateBullet();
-				break;
-		}
+		case GLUT_KEY_RIGHT:
+			Px -= velCam;
+			break;
+
+		/*case GLUT_KEY_UP:
+			Py -= velCam;
+			break;
+
+		case GLUT_KEY_DOWN:
+			Py += velCam;
+			break;*/
+	}
+}
+
+void Mouse(int button, int state, int x, int y)
+{
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
+		if(x > btDisparar.x && x < btDisparar.x + btDisparar.ancho)
+			if(y < ALTO_PANTALLA - btDisparar.y && y > ALTO_PANTALLA - btDisparar.y - btDisparar.alto)
+			{
+				if(turno == 0)
+				{
+					turno = 1;
+					currentWorm[allyIndex].isAtacking = 1;
+					bullet.isActive = 1;
+				}
+				else if (turno == 1)
+				{
+					turno = 2;
+				}
+				else if (turno == 5 || turno == 6)
+				{
+					CrearGusanos();
+					Px = 0;
+					Py = 0;
+					allyIndex = 0;
+					enemyIndex = 0;
+					currentWorm = &allies[allyIndex];
+					CrearBala();
+					CrearBoton();
+					turno = 0;
+					velocidad = 0;
+					fase = 0;
+				}
+			}
 	}
 }
