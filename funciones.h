@@ -19,6 +19,7 @@
 #define L_DOT 0xAAAA
 #define L_DOTDASH 0xC9C9
 #define L_DASH 0x6666
+#define L_LONGDOTDASH 0xBEBE
 
 
 //__________________________________________________Paleta de colores
@@ -111,7 +112,7 @@ WORM enemies[NUM_WORMS];
 WORM * currentWorm;
 BULLET bullet;
 float Px, Py;
-int turno; //0  moviendo, 1 dapuntando, 2 cargando, 3 en el aire, 4 explosion, 5 ganaste, 6 perdiste
+int turno; //-2 moviendo camara a derecha, -1 moviendo camara a izquierda, 0  moviendo, 1 dapuntando, 2 cargando, 3 en el aire, 4 explosion, 5 ganaste, 6 perdiste
 int allyIndex;
 int enemyIndex;
 float velocidad;

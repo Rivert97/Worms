@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 
 void display()
 {
-	char texto[10];
+	char texto[30];
 	static float randomNumber = 0.5;
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -60,6 +60,7 @@ void display()
 				Px--;
 			else
 				turno = 0;
+			break;
 		case -1:
 			if(-Px > (currentWorm->x - ANCHO_PANTALLA/2))
 				Px++;
@@ -71,15 +72,6 @@ void display()
 			DibujarTexto(texto, ANCHO_PANTALLA/2 - 80, ALTO_PANTALLA-30);
 			sprintf(texto, "Atacar [Enter]");
 			DibujarBoton(texto);
-			/*if(fase == 1)
-			{
-				if(currentWorm->x < (currentWorm->x + randomNumber*30))
-					currentWorm->x += 0.5;
-				else if(currentWorm->x > (currentWorm->x - randomNumber*30))
-					currentWorm->x -= 0.5;
-				else
-					turno++;
-			}*/
 			break;
 
 		case 1://Momento de atacar
@@ -94,7 +86,8 @@ void display()
 			DibujarTexto(texto, ANCHO_PANTALLA/2 - 80, ALTO_PANTALLA - 30);
 			DibujarVelocidad(velocidad, Px, Py);
 			break;
-
+			//3->Bala en el aire
+			//4->animación de estrellado de la bala
 		case 5://Ganaste
 			sprintf(texto, "¡EQUIPO ROJO ANIQUILADO!");
 			AsignaColor(VERDE);
